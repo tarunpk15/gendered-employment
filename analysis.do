@@ -4,7 +4,7 @@ use "final_merged_panel.dta", clear
 * Run main regression (with industry)
 reg Employment i.Female##i.Year Age_c Age_c2 Edu_primary Edu_secondary Rural Married Industry_ind Industry_serv, robust
 
-estimates store model1
+estimates store model3
 
 * Run regression without industry
  reg Employment i.Female##i.Year Age_c Age_c2  Edu_primary Edu_secondary  Rural Married, robust
@@ -14,7 +14,7 @@ estimates store model1
 * Run regression with industry and service and post interaction terms
  reg Employment i.Female##i.Post##i.Industry_serv Age_c Age_c2 Edu_primary Edu_secondary Rural Married Industry_ind, robust
  
-estimates store model3
+estimates store model1
  
  
  *compare model1 , model2

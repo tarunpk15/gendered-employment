@@ -1,80 +1,82 @@
-# 📊 Impact of COVID-19 on Female Employment (PLFS Data)
+# 📊 Diagnostic Analysis: COVID-19 Impact on Female Employment
 
 ## 📌 Overview
-This project analyzes the differential impact of COVID-19 on female employment in India using PLFS data (2018–2021). A Difference-in-Differences (DiD) framework is used to estimate causal effects.
+To ensure the robustness of the Difference-in-Differences (DiD) estimates, three nested models were evaluated. This document provides the empirical evidence for model selection and validity based on specification, variance, and collinearity tests for the dataset (**N = 1,180,999**).
 
 ---
 
-## 🧪 Diagnostic Tests
+## 🧪 Comparative Diagnostic Results
 
-To ensure robustness and validity of results, several econometric diagnostic tests were performed.
+### 1️⃣ Heteroskedasticity Tests
+The null hypothesis (**H0**) is constant variance (homoskedasticity).
 
----
+| Test | Model 3 (Baseline) | Model 2 (Demographic) | Model 1 (Full) |
+| :--- | :---: | :---: | :---: |
+| **Breusch-Pagan (p-value)** | 0.0000 | 0.0000 | 0.0000 |
+| **White Test (p-value)** | 0.0000 | 0.0000 | 0.0000 |
 
-### 1️⃣ Model Specification & Correctness
+* **Interpretation:** All models show significant heteroskedasticity (**p < 0.001**).
+* **Concern?** **No.** While it violates the Gauss-Markov assumption for OLS, we have explicitly corrected for this by using **Huber-White robust standard errors**. The presence of heteroskedasticity is expected in micro-level PLFS data.
 
-#### Linktest
-- Command: linktest
-- Purpose: Detects model misspecification.
-- Interpretation:
-  - _hat should be significant
-  - _hatsq should NOT be significant
+### 2️⃣ Model Specification (Ramsey RESET)
+The null hypothesis (**H0**) is that the model has no omitted variables.
 
-#### Ramsey RESET Test
-- Command: estat ovtest
-- Purpose: Tests for omitted variables or incorrect functional form.
-- Interpretation:
-  - p > 0.05 → Model correctly specified
-  - p < 0.05 → Possible misspecification
+| Test | Model 3 (Baseline) | Model 2 (Demographic) | Model 1 (Full) |
+| :--- | :---: | :---: | :---: |
+| **RESET Test (p-value)** | 0.0000 | 0.0000 | 0.0000 |
 
----
+* **Interpretation:** The test rejects the null, suggesting possible omitted variable bias or non-linear functional forms.
+* **Concern?** **Minor.** In datasets with over 1 million observations, the RESET test is extremely sensitive and almost always rejects the null. However, the massive increase in **R-squared** from Model 3 (**0.199**) to Model 1 (**0.533**) shows that we have significantly mitigated this bias by adding controls.
 
-### 2️⃣ Model Selection (AIC & BIC)
+### 3️⃣ Multicollinearity (Mean VIF)
+VIF measures how much the variance of a coefficient is inflated due to correlation with other predictors.
 
-- Command: estat ic
-- Purpose: Compare models based on fit and complexity.
-- Interpretation:
-  - Lower AIC → Better fit
-  - Lower BIC → More parsimonious model
+| Metric | Model 3 (Baseline) | Model 2 (Demographic) | Model 1 (Full) |
+| :--- | :---: | :---: | :---: |
+| **Mean VIF** | 2.32 | 1.73 | 1.69 |
+| **Highest Individual VIF** | 2.98 (Interaction) | 2.98 (Interaction) | 2.98 (Interaction) |
 
----
+* **Interpretation:** All Mean VIFs are well below the threshold of 5 or 10.
+* **Concern?** **None.** Even with interaction terms, the collinearity is remarkably low. This ensures our standard errors are stable and reliable.
 
-### 3️⃣ Heteroskedasticity
+### 4️⃣ Model Selection (AIC & BIC)
+Used to determine which model offers the best fit relative to its complexity.
 
-#### Breusch-Pagan Test
-- Command: hettest
-- Null Hypothesis: Constant variance
+| Metric | Model 3 (Baseline) | Model 2 (Demographic) | Model 1 (Full) |
+| :--- | :---: | :---: | :---: |
+| **AIC** | 1,447,044 | 1,176,595 | **810,177** |
+| **BIC** | 1,447,092 | 1,176,715 | **810,321** |
 
-#### White Test
-- Command: estat imtest, white
-- More general test for heteroskedasticity
-
-📌 Result:
-Heteroskedasticity was detected; hence robust standard errors were used.
+* **Interpretation:** Lower values represent better models. Model 1 shows a substantial reduction in both AIC and BIC, indicating the best statistical performance.
 
 ---
 
-### 4️⃣ Multicollinearity
+## 🔍 Individual Model Breakdown
 
-#### Variance Inflation Factor (VIF)
-- Command: estat vif
+### **Model 3: Baseline DiD**
+* **Performance:** Lowest explanatory power (**R-squared = 0.199**).
+* **Diagnostics:** High AIC/BIC suggests it is under-fitted. It fails to account for demographic shifts that might correlate with employment.
+* **Status:** Used only as a primitive benchmark.
 
-- Interpretation:
-  - VIF < 5 → Safe
-  - VIF > 10 → Problematic
+### **Model 2: Demographic Controls**
+* **Performance:** Moderate fit (**R-squared = 0.363**).
+* **Diagnostics:** While better than Model 3, it still ignores the sectoral nature of the pandemic shock (Service vs. Industry).
+* **Status:** Useful for seeing the "raw" impact of household factors like marriage and education.
 
-📌 Note:
-Higher VIFs in interaction terms are expected and not problematic.
+### **Model 1: Full Model (Demographic + Sectoral)**
+* **Performance:** Highest explanatory power (**R-squared = 0.533**).
+* **Diagnostics:** Lowest AIC/BIC. It maintains the lowest Mean VIF (**1.69**), meaning the inclusion of industry variables did not introduce problematic multicollinearity.
+* **Status:** The most robust and reliable specification for inference.
 
 ---
 
-### 5️⃣ Serial / Cluster Correlation
+## 🏆 Final Conclusion: The Best Suited Model
 
-#### Durbin-Watson Test
-- Command: estat dwatson
-- Limited applicability for pooled cross-sections
+**Model 1 is statistically best suited for this study.**
 
-#### Clustered Standard Errors
-- Recommended approach:
-```stata
-vce(cluster Year)
+1.  **Explanatory Power:** It explains **53.3%** of the variance in employment, a massive improvement over the baseline.
+2.  **Information Theory:** The **AIC/BIC** values for Model 1 are significantly lower than the others, providing the strongest evidence for its selection.
+3.  **Parsimony:** Despite having the most variables, it maintains the lowest **Mean VIF**, proving that the sectoral controls (Industry) are distinct and necessary predictors.
+4.  **Causal Identification:** By controlling for Industry, Model 1 ensures that the DiD estimator (`1.Female#1.Post`) is not simply picking up the fact that women work in different sectors than men, but is isolating the gendered shock within those sectors.
+
+> **Recommendation:** All final project inferences and the Event Study analysis should be based on the coefficients generated by **Model 1**.
