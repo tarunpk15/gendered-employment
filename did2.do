@@ -1,69 +1,58 @@
 ********************************************************************************
-* PROJECT: Gendered Impact of COVID-19 (Female Subsample Analysis)
-* TASK: Absolute Impact Trend and Sectoral DiD (Services vs. Others)
-* BASE YEAR: 2019 | DATA: Females Only
+* MASTER DO-FILE: COVID-19 EMPLOYMENT IMPACT (N = 1,180,999)
+* ANALYSIS: GENDERED IMPACT VS. TOTAL POPULATION IMPACT
+* BASE YEAR: 2019
 ********************************************************************************
 
 // 1. Setup
-ssc install coefplot, replace
 ssc install estout, replace
+ssc install coefplot, replace
 
-// 2. Filter data for Females Only
-// preserve // Optional: use preserve/restore if you want to keep the full dataset in memory
-keep if Female == 1
+// 2. Ensure Post variable exists
+capture gen Post = (Year >= 2020)
 
 ********************************************************************************
-* PART A: ABSOLUTE EVENT STUDY (Interrupted Time Series)
+* SECTION 1: THE GENDERED IMPACT (Full Model with All Controls)
 ********************************************************************************
-/* This measures the absolute change in employment probability for women 
-   in each year relative to the 2019 baseline. 
-*/
 
+* A. Standard DiD
+reg Employment i.Female##i.Post Age_c Age_c2 Edu_primary Edu_secondary Rural Married Industry_ind Industry_serv, robust
+estimates store gender_did
+
+* B. Event Study (Dynamic DiD)
+reg Employment ib2019.Year##i.Female Age_c Age_c2 Edu_primary Edu_secondary Rural Married Industry_ind Industry_serv, robust
+estimates store gender_event
+
+********************************************************************************
+* SECTION 2: THE TOTAL POPULATION IMPACT (No Gender Constraints)
+********************************************************************************
+
+* A. Standard DiD (Overall Average Shock)
+reg Employment i.Post Age_c Age_c2 Edu_primary Edu_secondary Rural Married Industry_ind Industry_serv, robust
+estimates store total_did
+
+* B. Event Study (Overall Dynamic Shock)
 reg Employment ib2019.Year Age_c Age_c2 Edu_primary Edu_secondary Rural Married Industry_ind Industry_serv, robust
-estimates store absolute_event_study
-
-// Visualization of the Absolute Trend
-coefplot, keep(*.Year) vertical yline(0, lcolor(red) lpattern(dash)) ///
-    title("Absolute Impact on Female Employment (Base Year: 2019)") ///
-    ytitle("Change in Probability") xtitle("Year") ///
-    rename(2018.Year = "2018" 2020.Year = "2020" 2021.Year = "2021") ///
-    note("Reference Year: 2019. This shows the absolute trend for the female population.")
+estimates store total_event
 
 ********************************************************************************
-* PART B: SECTORAL DiD (Service Sector Women vs. Other Women)
-********************************************************************************
-/* Since you want a 'DiD' for females, we use Industry_serv as the treatment.
-   Treatment: Women in Services | Control: Women in Industry/Agri
-*/
-
-reg Employment i.Industry_serv##i.Post Age_c Age_c2 Edu_primary Edu_secondary Rural Married Industry_ind, robust
-estimates store sectoral_did_fem
-
-********************************************************************************
-* PART C: SECTORAL EVENT STUDY (Dynamic Sectoral Impact)
-********************************************************************************
-/* This determines if service-sector women fell behind other women specifically 
-   in 2020 and 2021.
-*/
-
-reg Employment ib2019.Year##i.Industry_serv Age_c Age_c2 Edu_primary Edu_secondary Rural Married Industry_ind, robust
-estimates store sectoral_event_fem
-
-// Visualization of Sectoral Divergence
-coefplot, keep(*.Year#1.Industry_serv) vertical yline(0, lcolor(red) lpattern(dash)) ///
-    title("Sectoral Divergence within Females (Services vs. Others)") ///
-    ytitle("Coefficient (Relative to Non-Service Women & 2019)") ///
-    xtitle("Year") ///
-    rename(2018.Year#1.Industry_serv = "2018" 2020.Year#1.Industry_serv = "2020" 2021.Year#1.Industry_serv = "2021")
-
-********************************************************************************
-* PART D: COMPARISON TABLE
+* SECTION 3: COMPARISON TABLES
 ********************************************************************************
 
-esttab absolute_event_study sectoral_did_fem sectoral_event_fem, b(%9.4f) se(%9.4f) ///
-    star(* 0.05 ** 0.01 *** 0.001) ///
-    title("Absolute Female Employment Analysis") ///
-    mtitle("Absolute Trend" "Sectoral DiD" "Sectoral Event") ///
-    addnotes("All models restricted to Female observations only." "Sectoral models use Industry_serv as the treatment group.")
+// TABLE 1: Gendered Impact Analysis (DiD vs. Event Study)
+esttab gender_did gender_event, b(%9.4f) se(%9.4f) star(* 0.05 ** 0.01 *** 0.001) ///
+    keep(1.Female 1.Post 1.Female#1.Post *.Year#1.Female) ///
+    title("Table 1: Gendered Impact Comparison") ///
+    mtitle("Static DiD" "Event Study") ///
+    addnotes("Note: All controls included. Event Study shows year-specific gender gaps relative to 2019.")
 
-// restore // Restore full dataset if preserve was used
+// TABLE 2: Total Population Impact Analysis (DiD vs. Event Study)
+esttab total_did total_event, b(%9.4f) se(%9.4f) star(* 0.05 ** 0.01 *** 0.001) ///
+    keep(1.Post *.Year) ///
+    title("Table 2: Total Population Impact Comparison") ///
+    mtitle("Static DiD" "Event Study") ///
+    addnotes("Note: This model removes gender interactions to show the absolute impact on the whole sample.")
+
+********************************************************************************
+* END OF DO-FILE
+********************************************************************************

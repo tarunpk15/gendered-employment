@@ -1,77 +1,79 @@
-# Econometric Research Note: DiD and Event Study Analysis
+# 📈 Employment Impact Analysis: Difference-in-Differences and Event Study
 
-## 1. Project Overview
-This research employs quasi-experimental econometric techniques to isolate the causal impact of the COVID-19 pandemic on gender-based employment outcomes. Utilizing a dataset of **1,180,999 observations**, we move beyond simple correlations to test the "She-cession" hypothesis using **Difference-in-Differences (DiD)** and **Dynamic Event Study** methodologies. 
-
-By comparing females (Treatment Group) against males (Control Group) across the 2018–2021 period, we identify not only the immediate shock of the pandemic but also the structural reversal of pre-existing progress in the labor market.
+## 📌 Research Overview
+This document summarizes the empirical findings regarding the impact of COVID-19 on employment probabilities using two distinct approaches: a **Gendered Impact Study** (Relative Effect) and a **Total Population Impact Study** (Absolute Effect). The analysis compares static Difference-in-Differences (DiD) estimates with dynamic Event Study results using **2019 as the baseline year**.
 
 ---
 
-## 2. Problem Statement
-The COVID-19 pandemic introduced an exogenous shock that disproportionately affected high-contact service sectors. This study seeks to determine:
-1.  **The Counterfactual:** What would have happened to female employment if the pandemic had not occurred?
-2.  **Trend Interruption:** Did the pandemic widen a stable gap, or did it halt a narrowing trend?
-3.  **The Recovery Gap:** Did the gendered impact intensify during the "reopening" phase of 2021?
+## 1️⃣ Study A: Gendered Impact Analysis (Full Model)
 
----
+### 🔬 Model Specification
+This model estimates the relative shock to female employment compared to male employment, controlling for age, education, location, and industry.
 
-## 3. Methodology & Model Specifications
+**Static DiD Formula:**
+$$Employment_{it} = \alpha + \beta_1 Female_i + \beta_2 Post_t + \delta (Female_i \times Post_t) + \gamma X_{it} + \epsilon_{it}$$
 
-### 3.1 Standard Difference-in-Differences (DiD)
-The DiD model compares the changes in outcomes over time between a group that is affected by an event and a group that is not.
-* **Equation:** $$Employment_{it} = \beta_0 + \beta_1 Female_i + \beta_2 Post_t + \delta(Female_i \times Post_t) + \gamma X_{it} + \epsilon_{it}$$
-* **Logic:** It collapses the timeline into "Pre" (2018-2019) and "Post" (2020-2021). The coefficient $\delta$ (`1.Female#1.Post`) provides the Average Treatment Effect on the Treated (ATT).
+**Dynamic Event Study Formula:**
+$$Employment_{it} = \alpha + \beta_1 Female_i + \sum_{k \neq 2019} \delta_k Year_k + \sum_{k \neq 2019} \lambda_k (Female_i \times Year_k) + \gamma X_{it} + \epsilon_{it}$$
 
-### 3.2 The Event Study (Dynamic DiD)
-The Event Study is a granular version of the DiD that interacts the treatment group with individual years, using **2019 as the excluded baseline year**.
-* **Logic:** * **2018 Interaction:** Tests the **Parallel Trends Assumption**.
-    * **2020/2021 Interactions:** Captures the dynamic evolution of the shock and the "She-cession" during the recovery.
+### 📊 Results Summary
 
----
+| Metric | Static DiD Estimator | Event Study (2020) | Event Study (2021) |
+| :--- | :---: | :---: | :---: |
+| **Coefficient** | **+0.0143*** | **-0.0097*** | **-0.0242*** |
+| **P-Value** | < 0.001 | < 0.001 | < 0.001 |
 
-## 4. Empirical Results: The DiD Table
-
-The following table summarizes the **4 Averages** (Cell Means) and the **3 Differences** calculated from the `margins` and `regression` output.
-
+#### **The DiD Decomposition (Averages & Differences)**
 | Group | Pre-COVID (2018-19) | Post-COVID (2020-21) | **Difference (Time)** |
 | :--- | :---: | :---: | :---: |
-| **Male (Control)** | 0.5828 | 0.6034 | **+0.0206*** |
-| **Female (Treatment)** | 0.3221 | 0.3570 | **+0.0349*** |
-| **Baseline Gap (Gender)** | **-0.2607*** | **-0.2464*** | **DiD: +0.0143*** |
+| **Male (Control)** | $\mu_{M, Pre}$ | $\mu_{M, Post}$ | $\Delta Male = +0.0206$ |
+| **Female (Treatment)** | $\mu_{F, Pre}$ | $\mu_{F, Post}$ | $\Delta Female = +0.0349$ |
+| **Difference (Gender)** | $-0.2607$ | $-0.2464$ | **DiD: +0.0143** |
 
-> **Note:** All values represent the adjusted probability of employment. * denotes statistical significance at the 0.1% level ($p < 0.001$).
-
----
-
-## 5. Event Study Results (Dynamic Analysis)
-
-While the standard DiD provides an average, the Event Study identifies the year-by-year trajectory relative to the **2019 baseline**.
-
-* **2018 Pre-Trend (-0.0624):** The gap was significantly wider in 2018. This proves that women were already closing the gap rapidly before the pandemic started.
-* **2020 Shock (-0.0097):** In the immediate first year of the pandemic, the gap widened slightly (approx. 1%) relative to the 2019 baseline.
-* **2021 Divergence (-0.0242):** The gap widened significantly during the recovery phase, indicating an asymmetric return to work.
+### 💡 DiD vs. Event Study Comparison
+* **The Static Illusion:** The static DiD (+0.0143) suggests a relative improvement for women in the post-period.
+* **The Dynamic Reality:** The Event Study reveals a "Progress Interrupter" effect. While women were closing the gap rapidly in 2018 (-0.0624), the pandemic caused the gap to widen relative to 2019 in both 2020 (-0.0097) and 2021 (-0.0242).
+* **Conclusion:** The Event Study proves that the pandemic halted a high-momentum convergence trend that was active in 2018-2019.
 
 ---
 
-## 6. Detailed Inferences
+## 2️⃣ Study B: Total Population Impact (No Gender Constraints)
 
-### 6.1 The "Progress Interrupter" Inference
-The standard DiD estimator (**+0.0143**) is positive, which might suggest a relative improvement. However, when viewed alongside the **4 Averages**, it is clear that women have a massive baseline disadvantage (32.2% vs 58.3%). 
-The Event Study confirms that the positive DiD is a result of a **Trend-Break**. Women were narrowing the gap by over 6% in 2018. The pandemic successfully halted this momentum, essentially "freezing" the gap and then causing it to widen again by 2021.
+### 🔬 Model Specification
+This model captures the absolute change in employment probability for the entire population, regardless of gender.
 
-### 6.2 The Asymmetric Recovery (2021 vs. 2020)
-The cell means show that while women's employment probability rose to **0.3570** in the post-period, the distance between men and women increased between 2020 and 2021. This confirms that the "She-cession" is most visible not during the lockdown itself, but during the **uneven reopening**, where men re-entered the workforce at a faster rate than women.
+**Static DiD (Pre vs. Post) Formula:**
+$$Employment_{it} = \alpha + \beta_1 Post_t + \gamma X_{it} + \epsilon_{it}$$
 
-### 6.3 Control Variable Stability
-The consistency of controls confirms the robustness of the DiD results:
-* **Industry Factor:** Working in the Industrial sector (**+0.5488**) remains the strongest predictor of employment.
-* **Rural Advantage:** Rural residency provides a **17.09%** higher probability of employment, likely due to the "essential" nature of agricultural work.
-* **Marital Premium:** Being married provides a **2.9%** boost to employment probability, likely reflecting household economic stability.
+**Dynamic Event Study Formula:**
+$$Employment_{it} = \alpha + \sum_{k \neq 2019} \delta_k Year_k + \gamma X_{it} + \epsilon_{it}$$
+
+### 📊 Results Summary
+
+| Metric | Static DiD Estimator | Event Study (2020) | Event Study (2021) |
+| :--- | :---: | :---: | :---: |
+| **Coefficient** | **+0.0262*** | **+0.0200*** | **+0.0345*** |
+| **P-Value** | < 0.001 | < 0.001 | < 0.001 |
+
+#### **The Impact Decomposition**
+| Period | Adjusted Probability (Mean) | Absolute Change (Rel. to 2019) |
+| :--- | :---: | :---: |
+| **2018 (Pre)** | 0.1933 | +0.0023 |
+| **2019 (Baseline)** | **0.1911** | **0.0000** |
+| **2020 (Shock)** | 0.2111 | +0.0200 |
+| **2021 (Recovery)** | 0.2256 | +0.0345 |
+
+### 💡 DiD vs. Event Study Comparison
+* **Static View:** The population-wide employment probability increased by an average of 2.6 percentage points in the post-COVID years.
+* **Dynamic View:** The Event Study shows that the growth was significantly stronger in 2021 (+0.0345) than in 2020 (+0.0200).
+* **Conclusion:** There was no absolute decline in total employment probability in this dataset. Instead, the pandemic acted as a "speed bump" on a long-term upward trajectory, with 2021 showing a stronger recovery than the initial shock year of 2020.
 
 ---
 
-## 7. Conclusion
-The DiD and Event Study combination proves that the COVID-19 pandemic was a "Service Sector She-cession" that primarily acted as a **Progress Interruptor**. Before the pandemic, women were on a statistically significant path toward closing the employment gap. The pandemic halted this convergence. The significant divergence in 2021 (**-0.0242**) highlights that women faced higher barriers to re-entering the labor market than men, likely due to domestic burdens and sectoral volatility.
+## 🏆 Synthesis & Final Conclusion
 
----
-*Documented for Applied Econometrics Project - April 2026*
+1.  **Absolute Growth vs. Relative Decline:** While the **Total Population Study** shows that absolute employment probability increased during the pandemic, the **Gendered Impact Study** reveals that the benefits of this growth were not shared equally.
+2.  **The Trend-Break:** The Event Study is critical for this research because it exposes the **non-parallel trends**. In 2018, women were catching up to men at a rate of 6% per year. The pandemic not only stopped this catch-up but reversed it, as evidenced by the negative interactions in 2020 and 2021.
+3.  **The 2021 Divergence:** Both studies show that 2021 was a year of significant change. In the total population, it was a year of rapid growth, but for women, it was the year the gap widened the most (-0.0242). This suggests that the "Recovery" phase was the period of greatest gendered divergence.
+
+**Final Verdict:** The Event Study is the superior tool for this analysis as it successfully decomposes the "Average" DiD effect into a clear narrative of interrupted progress.
