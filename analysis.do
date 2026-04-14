@@ -21,5 +21,8 @@ estimates store model1
 estimates table model1 model2 model3, b se
  
  * Plot event study
-coefplot, keep(*.Female#*.Year) vertical yline(0) title("Event Study: Female Employment Effect") xtitle("Year") ytitle("Effect on Employment")
+coefplot, keep(1.Female#2018.Year 1.Female#2019.Year 1.Female#2020.Year 1.Female#2021.Year) ///
+    vertical yline(0) title("Event Study: Female Employment Effect") ///
+    xtitle("Year") ytitle("Effect on Employment") ///
+    rename(1.Female#2018.Year="2018" 1.Female#2019.Year="2019" 1.Female#2020.Year="2020" 1.Female#2021.Year="2021")
  
