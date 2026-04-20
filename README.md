@@ -1,7 +1,7 @@
 # Gendered Employment Impact Analysis
 
 A comprehensive econometric study investigating the differential effects of COVID-19 on employment by gender, using STATA for statistical analysis and difference-in-differences methodology.
-##test user
+
 ## Project Overview
 
 This research project analyzes the "She-cession" phenomenon by examining how COVID-19 differentially impacted male and female employment patterns. Using a dataset of **1,180,999 observations**, the study employs OLS regression models with robust standard errors to disentangle the complex relationship between gender, sectoral segregation, and pandemic-induced economic shocks.
